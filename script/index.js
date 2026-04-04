@@ -103,7 +103,10 @@ class Supertoaster extends Toaster{
 
     //FUNKTIONEN
     toast(){ //Die Funktion wird überschrieben, um die Temperatur zu berücksichtigen. Wenn die Temperatur zu hoch ist, wird das Toasten verweigert. Ansonsten wird die toast Funktion der Supertoaster Klasse aufgerufen, um den Toaststatus zu aktualisieren
-        if(this.#temperature > this.#temperaturesensor) return console.log("Temperature is too high, toasting denied"); //Sicherung gegen zu hohe Temperatur
+        if(this.#temperature > this.#temperaturesensor) {
+             console.error("Temperature is too high, toasting denied"); //Sicherung gegen zu hohe Temperatur
+            return
+        }
         super.toast(); //Die toast Funktion der Supertoaster Klasse ruft die toast Funktion der Toaster Klasse auf, um den Toaststatus zu aktualisieren
 
     }
