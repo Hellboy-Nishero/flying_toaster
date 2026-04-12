@@ -5,7 +5,6 @@
     min-height: 400px;
     padding: 10px 60px;
     display: flex;
-    background-color: #f5f5f5;
     border-radius: 48px 48px 12px 12px;
     box-shadow: -5px 10px 20px rgba(0, 0, 0, 0.1);
 
@@ -18,7 +17,11 @@
         right: -15px;
         top: 50px;
         z-index: -1;
-        transition: transoform .4s cubis-bezier(0.47, 0, 0.74, 0.71);
+        transition: all .2s cubic-bezier(0.47, 0, 0.74, 0.71);
+
+        &.down{
+          top: 300px;
+        }
     }
 
 
@@ -29,37 +32,37 @@
         align-items: center;
         gap: 40px;
 
-            .knobContainer{
-        position: relative;
-        width: 100px;
-        height: 100px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: #333;
-        border-radius: 50%;
-        box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        .knobContainer{
+            position: relative;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #333;
+            border-radius: 50%;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
 
              .marks {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
 
             .mark {
                 position: absolute;
                 font-weight: bold;
-                font-size: 14px;
+                font-size: 12px;
                 color: #ccc;
                 width: 20px;
                 height: 20px;
                 text-align: center;
                 
-                &.mark-0 { right: 40%; top: 0;}
-                &.mark-15 { right: 0; top: 25%; }
-                &.mark-30 { right: 8%; top: 70%; }
-                &.mark-45 { left: 25%; bottom: 0; }
-                &.mark-60 { left: -2%; top: 40%; }
+                &.mark-0 { right: 40px; top: 0;}
+                &.mark-15 { right: 2px; top: 25px; }
+                &.mark-30 { right: 7px; top: 70px; }
+                &.mark-45 { left: 25px; bottom: -3px; }
+                &.mark-60 { left: -3px; top: 40px; }
                 }
             }
 
@@ -112,6 +115,7 @@
           position: relative;
           display: flex;
           justify-content: center;
+          align-items: center;
           background: radial-gradient(circle at 30% 30%, #e0e0e0 0%, #a0a0a0 100%);
           box-shadow: 
             0 0 0 2px #2c2c2c, 
@@ -125,7 +129,7 @@
             color: #000;
             background: none;
             border: none;
-            filter: drop-shadow(1px 1px 0px rgba(255,255,255,0.5)); // Эффект гравировки
+            filter: drop-shadow(1px 1px 0px rgba(255,255,255,0.5));
           }
 
           &:hover {
@@ -133,13 +137,36 @@
           }
 
           &:active {
-            // Эффект физического нажатия
             transform: scale(0.96) translateY(1px);
             box-shadow: 
               0 0 0 2px #2c2c2c,
-              inset 4px 4px 6px rgba(0, 0, 0, 0.5); // Тень становится глубже при нажатии
+              inset 4px 4px 6px rgba(0, 0, 0, 0.5);
+          }
+
+          &.disabled{
+            cursor: not-allowed;
+            pointer-events: none;
           }
         }
+    }
+
+    .toast{
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 400px;
+      width: 100%;
+      height: 150px;
+      background-color: #F5F5DC;
+      border-radius: 8px;
+      z-index: -1;
+      transition: all .4s ease-in-out;
+
+      &.ready{
+        top: -100px;
+        transition: top 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+      }
     }
 
 

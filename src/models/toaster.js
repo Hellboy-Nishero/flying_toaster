@@ -5,7 +5,7 @@ export class Toaster{
     #shafts = 1; //private Variable für die Anzahl der Schächte. Steht als privat für die unerwünschte Manipulation von außen. Die Wert darf nicht null oder negativ sein
 
 
-    constructor(color="white"){
+    constructor(color="silver"){
         this.color = color;
     }
 
