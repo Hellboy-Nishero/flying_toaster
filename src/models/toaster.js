@@ -1,5 +1,5 @@
 export class Toaster{
-    #toastsAmount = 0; //private Variable für die Anzahl der Toasts. Steht als privat für die unerwünschte Manipulation von außen
+    #toastsAmount = 1; //private Variable für die Anzahl der Toasts. Steht als privat für die unerwünschte Manipulation von außen
     #time = 0; //private Variable für die Zeit. Steht als privat für die unerwünschte Manipulation von außen
     #toastsStatus = "untoasted"; //private Variable für die Toaststatus. Steht als privat für die unerwünschte Manipulation von außen
     #shafts = 1; //private Variable für die Anzahl der Schächte. Steht als privat für die unerwünschte Manipulation von außen. Die Wert darf nicht null oder negativ sein

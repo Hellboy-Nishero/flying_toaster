@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import { Toaster as ToasterModel} from '../../models/toaster.js';
 import { TOAST_COLORS as toastsStatus } from '../../config/colors.js';
 
-const Toaster = () => {
+const Toaster = ({shown}) => {
   const { t } = useTranslation();
   const [value, setValue] = useState(0);
   const [angle, setAngle] = useState(0);
   const [toaster] = useState(new ToasterModel());
   const [isReady, setIsReady] = useState(false);
   const [isToasting, setIsToasting] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
 
   const handleKnobChange = (e) => { // Funktion, die aufgerufen wird, wenn sich der Wert des Knobs ändert. Sie aktualisiert den Wert und den Winkel des Knobs basierend auf der neuen Position.
@@ -47,11 +48,21 @@ const Toaster = () => {
     return () => clearTimeout(handler);
   }, [value]);
 
+  useEffect(() => {
+      if (shown) {
+        const timer = setTimeout(() => setIsVisible(true), 10);
+        return () => clearTimeout(timer);
+    } else {
+      setIsVisible(false);
+    }
+  }, [shown])
+
 
   return (
-    <div className="toaster" style={{backgroundColor: toaster.color}}>
-      {/* <p>{t('welcome')}</p> */}
-      <div className={`handle ${isToasting? 'down' : ''}`}></div>
+    <div className={`toaster ${isVisible ? 'shown' : ''}`} style={{backgroundColor: toaster.color}}>
+
+      <div className={`handle ${isToasting? 'down' : ''} ${isVisible ? 'visible' : ''}`}></div>
+
       <div className="controls">
         <div className="knobContainer">
             
