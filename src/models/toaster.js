@@ -3,6 +3,8 @@ export class Toaster{
     #time = 0; //private Variable für die Zeit. Steht als privat für die unerwünschte Manipulation von außen
     #toastsStatus = "untoasted"; //private Variable für die Toaststatus. Steht als privat für die unerwünschte Manipulation von außen
     #shafts = 1; //private Variable für die Anzahl der Schächte. Steht als privat für die unerwünschte Manipulation von außen. Die Wert darf nicht null oder negativ sein
+    #countdown = 0; //private Variable fürs Runterzählen. Sie wird für die Funktion "stop()" gebraucht
+    #current_time = 0; //private Variable für aktuelle Zeit. Wird benötig, um den Status von Toasts bei der Funktion "stop()" zu berechnen
 
 
     constructor(color="silver"){
@@ -64,11 +66,39 @@ export class Toaster{
     }
 
     toast(){ //Die Toasts werden getoastet
-        if(this.#time == 0) this.#toastsStatus = "untoasted";
-        else if(this.#time > 0 && this.#time <= 15) this.#toastsStatus = "lightly toasted";
-        else if(this.#time > 15 && this.#time < 30) this.#toastsStatus = "strong toasted";
-        else if(this.#time >= 30) this.#toastsStatus = "burnt";
-        return console.log(`Toasts status is ${this.#toastsStatus}`);
+       if (this.#countdown) {
+        clearInterval(this.#countdown);
+        }
+
+        this.#current_time = 0;
+
+        this.#countdown = setInterval(() => {
+            this.#current_time += 1;
+            console.log("Ticking... current_time is:", this.#current_time);
+        }, 1000);
+
+
+    }
+
+    stop(){
+        console.log(`time is: ${this.#current_time}`)
+        clearInterval(this.#countdown);
+
+       if(this.#current_time === 0) {
+        this.#toastsStatus = "untoasted";
+        } else if (this.#current_time <= 15) {
+        this.#toastsStatus = "lightly toasted";
+        } else if (this.#current_time < 30) {
+        this.#toastsStatus = "strong toasted";
+        } else {
+        this.#toastsStatus = "burnt";
+        }
+
+        console.log(`Final Status: ${this.#toastsStatus}, Time: ${this.#current_time}s`);
+        // this.#current_time = 0;
+
+        return this.#toastsStatus;
+        
     }
 
 }
