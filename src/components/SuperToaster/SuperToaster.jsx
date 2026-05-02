@@ -3,6 +3,7 @@ import {Supertoaster as ToasterModel} from '../../models/toaster';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TOAST_COLORS as toastsStatus } from '../../config/colors.js';
+import { AVAILABLE_COLORS as colors } from '../../config/colors';
 
 const SuperToaster = ({shown}) => {
   const {t} = useTranslation();
@@ -15,6 +16,7 @@ const SuperToaster = ({shown}) => {
   const [isToasting, setIsToasting] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [currentStatus, setCurrentStatus] = useState("untoasted");
+  const [color, setColor] = useState("silver");
   const timerRef = useRef(null);
   const delayRef = useRef (null);
 
@@ -49,21 +51,58 @@ const SuperToaster = ({shown}) => {
       delayRef.current = time * 1000;
       superToaster.toast();
 
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         setIsToasting(false);
 
         superToaster.putOut();
         const finalResult = superToaster.stop();
+        const toastPayLoad = {
+          status: superToaster.toastsStatus,
+          time_minutes: superToaster.current_time,
+          toasts_amount: superToaster.toastsAmount,
+          temperature: superToaster.temperature
+        }
+        saveToastData(toastPayLoad);
         setCurrentStatus(finalResult);
         setIsReady(true);
       }, delayRef.current)
   }
 
+    const saveToastData = async (data) => { //Speichert die Daten vom letzten Toastversuch und schickt in Datenbank
+      try {
+      const res = await fetch("http://localhost:8080/api/toasts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({
+          status: data.status,
+          time_minutes: data.time_minutes,
+          toasts_amount: data.toasts_amount,
+          temperature: data.temperature
+        })
+      })
+      .then(res => res.json())
+      .then(data => console.log(data))
+      console.log("Data saved to DB");
+    } catch (e) {
+      console.error("Save failed", e);
+    }
+  }
+
   const handleStop = () => {
     if(!isToasting) return;
-    clearTimeout(delayRef.current);
+
+
+    clearTimeout(timerRef.current);
+    superToaster.putOut();
     const finalResult = superToaster.stop();
     setCurrentStatus(finalResult);
+    const toastPayLoad = {
+      status: superToaster.toastsStatus,
+      time_minutes: superToaster.current_time,
+      toast_amount: superToaster.toastsAmount,
+      temperature: superToaster.temperature
+    }
+    saveToastData(toastPayLoad);
     setIsToasting(false);
     setIsReady(true);
   }
@@ -82,6 +121,11 @@ const SuperToaster = ({shown}) => {
     clearTimeout(delayRef.current);
     clearInterval(timerRef.current);
 
+  }
+
+  const changeColor = (color) => {
+    superToaster.color = color.name;
+    setColor(color.hex);
   }
 
 
@@ -109,44 +153,57 @@ const SuperToaster = ({shown}) => {
   }, [])
 
 
+
   return (
-    <div className={`super-toaster ${isShown ? 'shown' : ''}`} style={{backgroundColor: `${superToaster.color}`}}> 
-      <div className="silvertop"></div>
-      <h1 className="brand-name">Johnny Silvertoast</h1>
-      <div className="controls">
-        <div className="temp-display">
-          {
-
-            superToaster.temperature === 200 
-            ? <p className="display-text">SYSTEM_READY</p>
-            : superToaster.temperature >= 500
-            ? <p className='display-text danger-glitch' data-text="WAKE_UP_SAMURAI">CRIT_OVERHEAT_ERR</p>
-            : <p className='display-text digit'>{superToaster.temperature}°</p> 
-          }
-          <div className="display-controls">
-            <button className="display-btn" onMouseDown={() => startAdjusting(increaseTemp)} onMouseUp={stopAdjusting}>+</button>
-            <button className="display-btn" onMouseDown={() => startAdjusting(decreaseTemp)} onMouseUp={stopAdjusting}>-</button>
-          </div>
-        </div>
-
-        <div className="time-display">
-          {
-            superToaster.time === 0 
-            ? <p className="display-text">SET_TIME</p>
-            : superToaster.time >= 60
-            ? <p className="display-text danger-glitch" data-text="EAT_RECYCLED">OVERHEAT_RISK</p>
-            : <p className='display-text digit'>{superToaster.time} min</p>
-          }
-          <div className="display-controls">
-            <button className="display-btn" onMouseDown={() => startAdjusting(increaseTime)} onMouseUp={stopAdjusting} onMouseLeave={stopAdjusting}>+</button>
-            <button className="display-btn" onMouseDown={() => startAdjusting(decreaseTime)} onMouseUp={stopAdjusting} onMouseLeave={stopAdjusting}>-</button>
-          </div>
-        </div>
-        <button className="btn" onClick={() => handleStart(superToaster.time)}>{t('start_btn')}</button>
-        <button className="btn stop" onClick={handleStop}>{t('stop_btn')}</button>
-      </div>
-      <div className={`toast ${isReady ? 'ready' : ''}`} style={{backgroundColor: `${toastsStatus[currentStatus]}`}}></div>
+    <>
+    <div className="colorpicker">
+      {colors.map(color => (
+        <div 
+          key={color.name} 
+          className="color" 
+          style={{ backgroundColor: color.hex }} 
+          onClick={() => changeColor(color)}
+        />
+      ))}
     </div>
+      <div className={`super-toaster ${isShown ? 'shown' : ''}`} style={{backgroundColor: `${color}`}}> 
+        <div className="silvertop"></div>
+        <h1 className="brand-name">Johnny Silvertoast</h1>
+        <div className="controls">
+          <div className="temp-display">
+            {
+
+              superToaster.temperature === 200 
+              ? <p className="display-text">SYSTEM_READY</p>
+              : superToaster.temperature >= 500
+              ? <p className='display-text danger-glitch' data-text="WAKE_UP_SAMURAI">CRIT_OVERHEAT_ERR</p>
+              : <p className='display-text digit'>{superToaster.temperature}°</p> 
+            }
+            <div className="display-controls">
+              <button className="display-btn" onMouseDown={() => startAdjusting(increaseTemp)} onMouseUp={stopAdjusting}>+</button>
+              <button className="display-btn" onMouseDown={() => startAdjusting(decreaseTemp)} onMouseUp={stopAdjusting}>-</button>
+            </div>
+          </div>
+
+          <div className="time-display">
+            {
+              superToaster.time === 0 
+              ? <p className="display-text">SET_TIME</p>
+              : superToaster.time >= 60
+              ? <p className="display-text danger-glitch" data-text="EAT_RECYCLED">OVERHEAT_RISK</p>
+              : <p className='display-text digit'>{superToaster.time} min</p>
+            }
+            <div className="display-controls">
+              <button className="display-btn" onMouseDown={() => startAdjusting(increaseTime)} onMouseUp={stopAdjusting} onMouseLeave={stopAdjusting}>+</button>
+              <button className="display-btn" onMouseDown={() => startAdjusting(decreaseTime)} onMouseUp={stopAdjusting} onMouseLeave={stopAdjusting}>-</button>
+            </div>
+          </div>
+          <button className="btn" onClick={() => handleStart(superToaster.time)}>{t('start_btn')}</button>
+          <button className="btn stop" onClick={handleStop}>{t('stop_btn')}</button>
+        </div>
+        <div className={`toast ${isReady ? 'ready' : ''}`} style={{backgroundColor: `${toastsStatus[currentStatus]}`}}></div>
+      </div>
+    </>
   )
 }
 

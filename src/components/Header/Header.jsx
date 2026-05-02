@@ -3,10 +3,11 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 
-const Header = ({ toasterType, setToasterType}) => {
+const Header = ({ toasterType, setToasterType, setModalActive}) => {
 
     const { t, i18n } = useTranslation();
     const [isLangOpen, setIsLangOpen] = useState(false);
+
 
     const languages = [
         {code: "en", label: "English"},
@@ -23,7 +24,7 @@ const Header = ({ toasterType, setToasterType}) => {
         <div className="toaster-selector">
             <div className={`selection-slider ${toasterType === "super" ? "is-super" : ""}`}></div>
 
-            <button className={`toasterType === "basic" ? "active" : ""}`} onClick={() =>setToasterType('basic')}>
+            <button className={`toasterType === "basic" ? "active" : ""}`} onClick={() => setToasterType('basic')}>
                 {t('basic_model')}
             </button>
 
@@ -31,6 +32,9 @@ const Header = ({ toasterType, setToasterType}) => {
                 {t('super_model')}
             </button>
         </div>
+
+        <button className="history-btn" onClick={() => setModalActive(true)}>{t('history')}</button>
+
         <div className="language-selector" onClick={() => setIsLangOpen(!isLangOpen)}>
             <div className="current-lang">{currentLanguageLabel}</div>
             <div className={`dropdown ${isLangOpen ? "open" : ''}` }>

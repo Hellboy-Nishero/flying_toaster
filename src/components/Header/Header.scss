@@ -54,6 +54,27 @@
         }
     }
 
+    .history-btn{  
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 130px;
+        width: 100%;
+        border: 1px solid #2c2c2c;
+        border-radius: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #2c2c2c;
+        color: #eee;
+        transition: all .3s ease-in-out;
+        cursor: pointer;
+
+        &:hover{
+            color: #2c2c2c;
+            background-color: #eee;
+        }
+    }
+
     .language-selector{
         position: relative;
         cursor: pointer;
@@ -66,8 +87,11 @@
             border-radius: 20px;
             display: flex;
             align-items: center;
+            justify-content: center;
             border: 1px solid #444;
             transition: all .3s ease-in-out;
+            max-width: 94px;
+            width: 100%;
 
             &:hover{
                 color: #2c2c2c;

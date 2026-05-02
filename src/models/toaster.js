@@ -29,6 +29,10 @@ export class Toaster{
         return this.#shafts;
     }
 
+    get current_time(){ //Getter für die aktuelle Zeit
+        return this.#current_time;
+    }
+
     //SETTERS
     set time(value){ // Setter für die Zeit
         if(value < 0) return console.log("Time cannot be negative"); //Sicherung gegen negativen Zeitwert

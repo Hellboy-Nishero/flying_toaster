@@ -6,7 +6,12 @@
     list-style: none;
 }
 
+.main-container{
+    position: relative;
+}
+
 .toaster-container{
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
