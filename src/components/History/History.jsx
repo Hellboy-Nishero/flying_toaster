@@ -10,7 +10,7 @@ const History = ({modalActive, setModalActive}) => {
     useEffect(() => {
         const fetchToasts = async () => {
             try{
-                const res = await fetch("http://localhost:8080/api/toasts");
+                const res = await fetch("/api/toasts");
                 if (!res.ok){
                     throw new Error(`HTTP error! Status: ${res.status}`)
                 }

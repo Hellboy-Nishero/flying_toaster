@@ -40,7 +40,7 @@
 
 #### Beispiel mit curl
 ```bash
-curl -X POST "http://localhost:8080/api/toasts" \
+curl -X POST "/api/toasts" \
   -H "Content-Type: application/json" \
   -d '{
     "status": "lightly toasted",
@@ -52,7 +52,7 @@ curl -X POST "http://localhost:8080/api/toasts" \
 
 #### Beispiel mit JavaScript
 ```js
-fetch('http://localhost:8080/api/toasts', {
+fetch('/api/toasts', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
