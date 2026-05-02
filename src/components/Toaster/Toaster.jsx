@@ -59,7 +59,7 @@ const Toaster = ({shown}) => {
 
   const saveToastData = async (data) => { //Speichert die Daten vom letzten Toastversuch und schickt in Datenbank
     try {
-      const res = await fetch("http://localhost:8080/api/toasts", {
+      const res = await fetch("/api/toasts", {
         method: "POST",
         headers: { "Content-Type": "application/json"},
         body: JSON.stringify({
