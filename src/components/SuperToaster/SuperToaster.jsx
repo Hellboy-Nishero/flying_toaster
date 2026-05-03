@@ -14,19 +14,19 @@ const SuperToaster = ({shown}) => {
   const [time, setTime] = useState(superToaster.time);
   const [isReady, setIsReady] = useState(false);
   const [isToasting, setIsToasting] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
   const [currentStatus, setCurrentStatus] = useState("untoasted");
   const [color, setColor] = useState("silver");
-  const timerRef = useRef(null);
-  const delayRef = useRef (null);
+  const toastTimeoutRef = useRef(null);
+  const adjustDelayRef = useRef(null);
+  const adjustIntervalRef = useRef(null);
 
   const increaseTemp = () => {
-    superToaster.temperature += 10;
+    superToaster.temperature = Math.min(superToaster.temperature + 10, superToaster.temperaturesensor);
     setTemperature(superToaster.temperature);
   }
 
   const decreaseTemp = () => {
-    superToaster.temperature -= 10;
+    superToaster.temperature = Math.max(superToaster.temperature - 10, 200);
     setTemperature(superToaster.temperature);
   }
 
@@ -48,10 +48,10 @@ const SuperToaster = ({shown}) => {
 
       setIsToasting(true);
       setIsReady(false);
-      delayRef.current = time * 1000;
       superToaster.toast();
 
-      timerRef.current = setTimeout(() => {
+      const toastDuration = Math.max(time, 0) * 1000;
+      toastTimeoutRef.current = setTimeout(() => {
         setIsToasting(false);
 
         superToaster.putOut();
@@ -65,12 +65,12 @@ const SuperToaster = ({shown}) => {
         saveToastData(toastPayLoad);
         setCurrentStatus(finalResult);
         setIsReady(true);
-      }, delayRef.current)
+      }, toastDuration)
   }
 
     const saveToastData = async (data) => { //Speichert die Daten vom letzten Toastversuch und schickt in Datenbank
       try {
-      const res = await fetch("/api/toasts", {
+      const response = await fetch("/api/toasts", {
         method: "POST",
         headers: { "Content-Type": "application/json"},
         body: JSON.stringify({
@@ -80,8 +80,13 @@ const SuperToaster = ({shown}) => {
           temperature: data.temperature
         })
       })
-      .then(res => res.json())
-      .then(data => console.log(data))
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `Request failed with status ${response.status}`);
+      }
+
+      console.log(result)
       console.log("Data saved to DB");
     } catch (e) {
       console.error("Save failed", e);
@@ -92,14 +97,14 @@ const SuperToaster = ({shown}) => {
     if(!isToasting) return;
 
 
-    clearTimeout(timerRef.current);
+    clearTimeout(toastTimeoutRef.current);
     superToaster.putOut();
     const finalResult = superToaster.stop();
     setCurrentStatus(finalResult);
     const toastPayLoad = {
       status: superToaster.toastsStatus,
       time_minutes: superToaster.current_time,
-      toast_amount: superToaster.toastsAmount,
+      toasts_amount: superToaster.toastsAmount,
       temperature: superToaster.temperature
     }
     saveToastData(toastPayLoad);
@@ -110,16 +115,16 @@ const SuperToaster = ({shown}) => {
   const startAdjusting = (action) => { //ermöglicht das kontinuierliche Erhöhen/Verringern der Werte durch Gedrückhalten der Maustaste (Long Press)
     action();
 
-    delayRef.current = setTimeout(() => {
-      timerRef.current = setInterval(() => {
+    adjustDelayRef.current = setTimeout(() => {
+      adjustIntervalRef.current = setInterval(() => {
         action()
       }, 100)
     }, 500)
   }
 
   const stopAdjusting = () => {
-    clearTimeout(delayRef.current);
-    clearInterval(timerRef.current);
+    clearTimeout(adjustDelayRef.current);
+    clearInterval(adjustIntervalRef.current);
 
   }
 
@@ -141,11 +146,11 @@ const SuperToaster = ({shown}) => {
     }
   }, [shown])
 
-  useEffect(() => {}, [superToaster])
-
-
   useEffect(() => {
-    const handleGlobalMouseUp = () => stopAdjusting();
+    const handleGlobalMouseUp = () => {
+      clearTimeout(adjustDelayRef.current);
+      clearInterval(adjustIntervalRef.current);
+    };
 
     window.addEventListener("mouseup", handleGlobalMouseUp);
 
@@ -173,11 +178,11 @@ const SuperToaster = ({shown}) => {
           <div className="temp-display">
             {
 
-              superToaster.temperature === 200 
+              temperature === 200 
               ? <p className="display-text">SYSTEM_READY</p>
-              : superToaster.temperature >= 500
+              : temperature >= 500
               ? <p className='display-text danger-glitch' data-text="WAKE_UP_SAMURAI">CRIT_OVERHEAT_ERR</p>
-              : <p className='display-text digit'>{superToaster.temperature}°</p> 
+              : <p className='display-text digit'>{temperature}°</p> 
             }
             <div className="display-controls">
               <button className="display-btn" onMouseDown={() => startAdjusting(increaseTemp)} onMouseUp={stopAdjusting}>+</button>
@@ -187,11 +192,11 @@ const SuperToaster = ({shown}) => {
 
           <div className="time-display">
             {
-              superToaster.time === 0 
+              time === 0 
               ? <p className="display-text">SET_TIME</p>
-              : superToaster.time >= 60
+              : time >= 60
               ? <p className="display-text danger-glitch" data-text="EAT_RECYCLED">OVERHEAT_RISK</p>
-              : <p className='display-text digit'>{superToaster.time} min</p>
+              : <p className='display-text digit'>{time} min</p>
             }
             <div className="display-controls">
               <button className="display-btn" onMouseDown={() => startAdjusting(increaseTime)} onMouseUp={stopAdjusting} onMouseLeave={stopAdjusting}>+</button>
