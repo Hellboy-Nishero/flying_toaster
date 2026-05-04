@@ -59,8 +59,8 @@ const SuperToaster = ({shown}) => {
         return;
       }
 
-      if(time <= MIN_TIME || time > MAX_TIME){
-        console.error("Time must be between 1 and 60 minutes");
+      if(time < MIN_TIME || time > MAX_TIME){
+        console.error("Time must be between 0 and 60 minutes");
         return;
       }
 
