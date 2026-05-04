@@ -5,6 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { TOAST_COLORS as toastsStatus } from '../../config/colors.js';
 import { AVAILABLE_COLORS as colors } from '../../config/colors';
 
+const MIN_TIME = 0;
+const MAX_TIME = 60;
+const MIN_TEMPERATURE = 200;
+const MAX_TEMPERATURE = 500;
+
 const SuperToaster = ({shown}) => {
   const {t} = useTranslation();
 
@@ -21,21 +26,29 @@ const SuperToaster = ({shown}) => {
   const adjustIntervalRef = useRef(null);
 
   const increaseTemp = () => {
-    superToaster.temperature = Math.min(superToaster.temperature + 10, superToaster.temperaturesensor);
+    if(superToaster.temperature >= MAX_TEMPERATURE) return;
+
+    superToaster.temperature += 10;
     setTemperature(superToaster.temperature);
   }
 
   const decreaseTemp = () => {
-    superToaster.temperature = Math.max(superToaster.temperature - 10, 200);
+    if(superToaster.temperature <= MIN_TEMPERATURE) return;
+
+    superToaster.temperature -= 10;
     setTemperature(superToaster.temperature);
   }
 
   const increaseTime = () => {
+    if(superToaster.time >= MAX_TIME) return;
+
     superToaster.time += 1;
     setTime(superToaster.time);
   }
 
   const decreaseTime = () => {
+    if(superToaster.time <= MIN_TIME) return;
+
     superToaster.time -= 1;
     setTime(superToaster.time);
   }
@@ -43,6 +56,11 @@ const SuperToaster = ({shown}) => {
     const handleStart = (time) => {
       if(isToasting){
         console.error("Toaster is already toasting");
+        return;
+      }
+
+      if(time <= MIN_TIME || time > MAX_TIME){
+        console.error("Time must be between 1 and 60 minutes");
         return;
       }
 
@@ -113,6 +131,8 @@ const SuperToaster = ({shown}) => {
   }
 
   const startAdjusting = (action) => { //ermöglicht das kontinuierliche Erhöhen/Verringern der Werte durch Gedrückhalten der Maustaste (Long Press)
+    if(isToasting) return;
+
     action();
 
     adjustDelayRef.current = setTimeout(() => {
@@ -129,6 +149,8 @@ const SuperToaster = ({shown}) => {
   }
 
   const changeColor = (color) => {
+    if(isToasting) return;
+
     superToaster.color = color.name;
     setColor(color.hex);
   }
@@ -165,7 +187,7 @@ const SuperToaster = ({shown}) => {
       {colors.map(color => (
         <div 
           key={color.name} 
-          className="color" 
+          className={`color ${isToasting ? 'disabled' : ''}`}
           style={{ backgroundColor: color.hex }} 
           onClick={() => changeColor(color)}
         />
@@ -185,8 +207,8 @@ const SuperToaster = ({shown}) => {
               : <p className='display-text digit'>{temperature}°</p> 
             }
             <div className="display-controls">
-              <button className="display-btn" onMouseDown={() => startAdjusting(increaseTemp)} onMouseUp={stopAdjusting}>+</button>
-              <button className="display-btn" onMouseDown={() => startAdjusting(decreaseTemp)} onMouseUp={stopAdjusting}>-</button>
+              <button className="display-btn" disabled={isToasting || temperature >= MAX_TEMPERATURE} onMouseDown={() => startAdjusting(increaseTemp)} onMouseUp={stopAdjusting}>+</button>
+              <button className="display-btn" disabled={isToasting || temperature <= MIN_TEMPERATURE} onMouseDown={() => startAdjusting(decreaseTemp)} onMouseUp={stopAdjusting}>-</button>
             </div>
           </div>
 
@@ -199,12 +221,12 @@ const SuperToaster = ({shown}) => {
               : <p className='display-text digit'>{time} min</p>
             }
             <div className="display-controls">
-              <button className="display-btn" onMouseDown={() => startAdjusting(increaseTime)} onMouseUp={stopAdjusting} onMouseLeave={stopAdjusting}>+</button>
-              <button className="display-btn" onMouseDown={() => startAdjusting(decreaseTime)} onMouseUp={stopAdjusting} onMouseLeave={stopAdjusting}>-</button>
+              <button className="display-btn" disabled={isToasting || time >= MAX_TIME} onMouseDown={() => startAdjusting(increaseTime)} onMouseUp={stopAdjusting} onMouseLeave={stopAdjusting}>+</button>
+              <button className="display-btn" disabled={isToasting || time <= MIN_TIME} onMouseDown={() => startAdjusting(decreaseTime)} onMouseUp={stopAdjusting} onMouseLeave={stopAdjusting}>-</button>
             </div>
           </div>
-          <button className="btn" onClick={() => handleStart(superToaster.time)}>{t('start_btn')}</button>
-          <button className="btn stop" onClick={handleStop}>{t('stop_btn')}</button>
+          <button className="btn" disabled={isToasting} onClick={() => handleStart(superToaster.time)}>{t('start_btn')}</button>
+          <button className="btn stop" disabled={!isToasting} onClick={handleStop}>{t('stop_btn')}</button>
         </div>
         <div className={`toast ${isReady ? 'ready' : ''}`} style={{backgroundColor: `${toastsStatus[currentStatus]}`}}></div>
       </div>
